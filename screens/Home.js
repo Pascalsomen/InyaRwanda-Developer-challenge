@@ -3,7 +3,7 @@ import {Component} from 'react'
 
 import { StyleSheet,  View,TextInput,Image,FlatList, Alert, ActivityIndicator,Platform,TouchableOpacity} from 'react-native';
 import { Container, Content, List,Right,Grid,Col,Card,CardItem, ListItem,Title, Thumbnail,Left,Body, Input, Icon, Header,Text, Picker, Button } from 'native-base';
-import ImageSlider from 'react-native-image-slider';
+import Slideshow from 'react-native-image-slider-show';
 class HomeScreen extends Component {
   static navigationOptions = {
     title: 'HomePage',
@@ -18,10 +18,62 @@ class HomeScreen extends Component {
           isLoading: true,
           JSON_from_server: [],
           fetching_Status: false,
+
+          position: 1,
+          interval: null,
+          dataSource: [
+            {
+              title: 'Title 1',
+              caption: 'Caption 1',
+              url: 'http://inyarwanda.com/app/webroot/img/201904/images/ubusitani-bwurwibutso-1-copy-219701554728185.jpg',
+            }, {
+              title: 'Title 2',
+              caption: 'Caption 2',
+              url: 'http://placeimg.com/640/480/any',
+            }, {
+              title: 'Title 3',
+              caption: 'Caption 3',
+              url: 'http://placeimg.com/640/480/any',
+            },
+          ]
       }
  
       this.page = 0
   }
+
+  componentWillMount() {
+    this.setState({
+      interval: setInterval(() => {
+        this.setState({
+          position: this.state.position === this.state.dataSource.length ? 0 : this.state.position + 1
+        });
+      }, 2000)
+    });
+  }
+ 
+  componentWillUnmount() {
+    clearInterval(this.state.interval);
+  }
+ 
+  
+  
+  componentDidMount()
+  {
+      this.page = this.page + 1;
+ 
+      fetch('http://somen.pe.hu/mobileApp/diplay.php')
+      .then((response) => response.json())
+      .then((responseJson) =>
+      {
+          this.setState({ JSON_from_server: [ ...this.state.JSON_from_server, ...responseJson ], isLoading: false });
+      })
+      .catch((error) =>
+      {
+          console.error(error);
+      });
+  }
+
+
   componentDidMount()
   {
       this.page = this.page + 1;
@@ -94,12 +146,14 @@ class HomeScreen extends Component {
         </View>
     )
   }
+  
   GetGridViewItem (post_id) {
    
     //Alert.alert(s_title);
     this.props.navigation.navigate('Details', { Story: post_id});
    
     }
+    
   render()
   {
     
@@ -126,11 +180,11 @@ class HomeScreen extends Component {
 
             <Content>
             <View>
-            <ImageSlider style={{height: 200, width: null, flex: 1}} images={[
-    'http://inyarwanda.com/app/webroot/img/201904/images/000a1363-2747551554491272.jpg',
-    'http://inyarwanda.com/app/webroot/img/201904/images/000a1491-3914921554491274.jpg',
-    'https://cdn.inquisitr.com/wp-content/uploads/2019/02/Georgina-Rodriguez.jpg',
-  ]}/>
+     
+            <Slideshow 
+        dataSource={this.state.dataSource}
+        position={this.state.position}
+        onPositionChanged={position => this.setState({ position })} />
 
       <View style = { styles.MainContainer }>
       {
