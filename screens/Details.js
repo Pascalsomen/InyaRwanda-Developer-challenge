@@ -8,10 +8,14 @@ class DetailsScreen extends Component {
     title: 'Details',
     
 
-
+    uniqueValue: 1
   };
 
- 
+  forceRemount = () => {
+    this.setState(({ uniqueValue }) => ({
+      uniqueValue: uniqueValue + 1,
+    }))
+  }
   checkUser  = async () => {
     try {
       const value = await AsyncStorage.getItem('user');
@@ -74,8 +78,8 @@ class DetailsScreen extends Component {
        if(responseJson === 1)
         {
     
-            this.props.navigation.navigate('Details');
-    
+            Alert.alert('Comment Sent! Your comment will be visible soon');
+;            this.forceRemount();
         }
         else{
     
@@ -150,7 +154,7 @@ class DetailsScreen extends Component {
     }
     return (
 
-<Container>
+<Container key={this.state.uniqueValue}>
                 <Content>
                
               
@@ -189,7 +193,7 @@ Published {item.created_at}  By {item.names}</Text>
 
 
 
-<List>
+<List >
             <ListItem thumbnail>
               <Left>
               <Thumbnail source={{ uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__340.png' }} />

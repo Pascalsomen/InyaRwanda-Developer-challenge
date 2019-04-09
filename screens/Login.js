@@ -5,7 +5,7 @@ import {AsyncStorage} from 'react-native';
 import { Container, Content, List, ListItem, InputGroup, Input, Icon, Text, Picker, Button } from 'native-base';
 class LoginScreen extends Component {
   static navigationOptions = {
-    title: 'Login to contunie',
+    title: 'Login to Contunie',
     headerLeft: null
 
 
@@ -51,44 +51,52 @@ class LoginScreen extends Component {
  
         const { user }  = this.state ;
         const { pass }  = this.state ;
-        
-        
-       fetch('http://somen.pe.hu/mobileApp/Login.php', {
-         method: 'POST',
-         headers: {
-           'Accept': 'application/json',
-           'Content-Type': 'application/json',
-         },
-         body: JSON.stringify({
-        
-           username: user,
-        
-           password: pass
-        
-         })
-        
-       }).then((response) => response.json())
-             .then((responseJson) => {
-        
-              if(responseJson === 1)
-               {
-               
+        if (this.state.user.trim() != "" && this.state.pass.trim() != "") {
 
-                this.storeData();
 
-                this.props.navigation.navigate('HomeScreen', { username: user });
+          fetch('http://somen.pe.hu/mobileApp/Login.php', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+           
+              username: user,
+           
+              password: pass
+           
+            })
+           
+          }).then((response) => response.json())
+                .then((responseJson) => {
+           
+                 if(responseJson === 1)
+                  {
+                  
+   
+                   this.storeData();
+   
+                   this.props.navigation.navigate('HomeScreen', { username: user });
+           
+                  }
+                  else{
+           
+                    Alert.alert(responseJson);
+                  }
+           
+                }).catch((error) => {
+                  console.error(error);
+                });
+           
+           
         
-               }
-               else{
+        } else {
         
-                 Alert.alert(responseJson);
-               }
+          this.setState(() => ({ nameError: "username or password can not be empty!" }));
+        }
         
-             }).catch((error) => {
-               console.error(error);
-             });
-        
-        
+      
          }
  
   
@@ -107,10 +115,10 @@ class LoginScreen extends Component {
 <Container>
                 <Content>
                 <View style={styles.container}>
-                
+                <Text style={{ color: "red" }}>{this.state.nameError}</Text>
                   <Text>Username:</Text>
                   
-                  <TextInput placeholder="Enter User Email" onChangeText={user => this.setState({user})} style={styles.TextInputStyle}/>
+                  <TextInput placeholder="Enter User Username" onChangeText={user => this.setState({user})} style={styles.TextInputStyle}/>
                   
                   <Text>Password:</Text>
                   
