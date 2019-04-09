@@ -6,7 +6,7 @@ import { Container, Content, List, ListItem,Left,Body, InputGroup, Input, Icon,T
 class ProfileScreen extends Component {
   static navigationOptions = {
     title: 'My Profile',
-
+     
 
   };
 

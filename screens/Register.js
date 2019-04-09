@@ -35,7 +35,7 @@ create = () =>{
 const { user }  = this.state ;
 const { pass }  = this.state ;
 
-
+if (this.state.user.trim() != "" && this.state.pass.trim() != "") {
 fetch('http://somen.pe.hu/mobileApp/Register.php', {
 method: 'POST',
 headers: {
@@ -66,7 +66,10 @@ password: pass
   }).catch((error) => {
     console.error(error);
   });
-
+} else {
+        
+  this.setState(() => ({ nameError: "username or password can not be empty!" }));
+}
 
 }
 
@@ -78,7 +81,7 @@ password: pass
                 <Content>
                 <View style={styles.container}>
                
-
+                <Text style={{ color: "red" }}>{this.state.nameError}</Text>
                 <Text>Username:</Text>
                 
                 <TextInput placeholder="Enter Username" onChangeText={user => this.setState({user})} style={styles.TextInputStyle}/>

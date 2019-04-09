@@ -1,7 +1,7 @@
 import React from 'react';
 import {Component} from 'react'
 
-import { StyleSheet,  View,TextInput,Image,FlatList, Alert, ActivityIndicator,Platform,TouchableOpacity} from 'react-native';
+import { StyleSheet,  View,TextInput,Image,FlatList, Alert,Dimensions, ActivityIndicator,Platform,TouchableOpacity,ScrollView} from 'react-native';
 import { Container, Content, List,Right,Grid,Col,Card,CardItem, ListItem,Title, Thumbnail,Left,Body, Input, Icon, Header,Text, Picker, Button } from 'native-base';
 import Slideshow from 'react-native-image-slider-show';
 class HomeScreen extends Component {
@@ -12,66 +12,32 @@ class HomeScreen extends Component {
   constructor()
   {
       super();
-      refreshing: false,
+     
       this.state =
       {
           isLoading: true,
           JSON_from_server: [],
           fetching_Status: false,
-
           position: 1,
-          interval: null,
-          dataSource: [
-            {
-              title: 'Title 1',
-              caption: 'Caption 1',
-              url: 'http://inyarwanda.com/app/webroot/img/201904/images/ubusitani-bwurwibutso-1-copy-219701554728185.jpg',
-            }, {
-              title: 'Title 2',
-              caption: 'Caption 2',
-              url: 'http://placeimg.com/640/480/any',
-            }, {
-              title: 'Title 3',
-              caption: 'Caption 3',
-              url: 'http://placeimg.com/640/480/any',
-            },
-          ]
+       
+          uniqueValue: 1
+          
       }
+      
  
       this.page = 0
   }
+  
 
-  componentWillMount() {
-    this.setState({
-      interval: setInterval(() => {
-        this.setState({
-          position: this.state.position === this.state.dataSource.length ? 0 : this.state.position + 1
-        });
-      }, 2000)
-    });
-  }
- 
-  componentWillUnmount() {
-    clearInterval(this.state.interval);
+  forceRemount = () => {
+    this.setState(({ uniqueValue }) => ({
+      uniqueValue: uniqueValue + 1,
+    }))
   }
  
   
   
-  componentDidMount()
-  {
-      this.page = this.page + 1;
  
-      fetch('http://somen.pe.hu/mobileApp/diplay.php')
-      .then((response) => response.json())
-      .then((responseJson) =>
-      {
-          this.setState({ JSON_from_server: [ ...this.state.JSON_from_server, ...responseJson ], isLoading: false });
-      })
-      .catch((error) =>
-      {
-          console.error(error);
-      });
-  }
 
 
   componentDidMount()
@@ -87,7 +53,22 @@ class HomeScreen extends Component {
       .catch((error) =>
       {
           console.error(error);
-      });
+      }),
+      fetch('http://somen.pe.hu/mobileApp/display.php')
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          loading: false,
+          dataSource: responseJson
+        }, function() {
+          // In this block you can do something with new state.
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+        
+
   }
  
   fetch_more_data_from_server =()=>
@@ -154,22 +135,29 @@ class HomeScreen extends Component {
    
     }
     
+  
+    
+    
   render()
   {
+   
     
     return(
-      <Container>
-<Header style={{backgroundColor:'#F2F2F2',height:90}}>
+      <Container key={this.state.uniqueValue}>
+<Header style={{backgroundColor:'white',height:90}}>
           <Left>
             <Button transparent onPress={()=>this.props.navigation.navigate('ProfileScreen')}>
               <Icon  style={{color:'black',paddingTop:20}} name='menu' />
             </Button>
           </Left>
           <Body>
-            <Title style={{color:'black',paddingTop:20}}>InyaRwanda</Title>
+          <View flexDirection='row'>
+          <Image source={{uri: 'https://yt3.ggpht.com/a-/AAuE7mCIp5F6d6PRUKCJBdCP82FBBwGlTKLpcZd-ug=s900-mo-c-c0xffffffff-rj-k-no'}} style={{width:25,height:25,marginTop:20}}  />
+            <Title style={{color:'black',paddingTop:20,  paddingLeft:5}}> InyaRwanda</Title>
+            </View>
           </Body>
           <Right>
-            <Button transparent>
+            <Button transparent onPress={this.forceRemount}>
               <Icon  style={{color:'black',paddingTop:20}} name='refresh' />
             </Button>
           </Right>
@@ -180,12 +168,33 @@ class HomeScreen extends Component {
 
             <Content>
             <View>
-     
-            <Slideshow 
-        dataSource={this.state.dataSource}
-        position={this.state.position}
-        onPositionChanged={position => this.setState({ position })} />
-
+     <View>
+            <FlatList  horizontal={true}
+            scrollIndicator={false}
+            data={ this.state.dataSource }
+            renderItem={({item}) =>     
+    
+         
+            
+             
+              
+          <Card>
+            <CardItem cardBody>
+              <Image source={{uri:item.image}} style={{height: 150, width: 290, flex: 1}}/>
+            </CardItem>
+            <CardItem style={{backgroundColor:'#0F0F0F'}}>
+             <Left/><Body>
+               <Text onPress={this.GetGridViewItem.bind(this, item.post_id)} numberOfLines={3} style={{width:250,fontSize:14,color:'white'}}>{item.title}</Text>
+             </Body><Right/>
+            </CardItem>
+          </Card>
+            
+    
+            }
+            keyExtractor={(item, index) => index}
+            numColumns={1}
+    />
+</View>
       <View style = { styles.MainContainer }>
       {
         ( this.state.isLoading )
@@ -205,13 +214,13 @@ class HomeScreen extends Component {
 
                 renderItem = {({ item, index }) => 
                 
-                <List style={{paddingTop:5,marginEnd:0}}>
+                <List>
             <ListItem thumbnail>
               <Left>
-                <Image source={{uri: item.image}} style={{width:90,height:120}}  />
+                <Image source={{uri: item.image}} style={{width:80,height:120}}  />
               </Left>
               <Body>
-              <Text numberOfLines={5} onPress={this.GetGridViewItem.bind(this, item.post_id)} style={{fontFamily:'',color:'#1A1A1A', fontSize:15,letterSpacing:0.5}} > 
+              <Text numberOfLines={5} onPress={this.GetGridViewItem.bind(this, item.post_id)} style={{fontFamily:'',color:'#1A1A1A', fontSize:14,letterSpacing:0.5}} > 
                {item.value} 
                 </Text>
                 <Text note numberOfLines={1}>{item.created_at}</Text>
